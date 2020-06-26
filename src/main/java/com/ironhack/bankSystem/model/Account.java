@@ -1,6 +1,8 @@
 package com.ironhack.bankSystem.model;
 
 import com.ironhack.bankSystem.util.Money;
+import lombok.Getter;
+import lombok.Setter;
 
 import javax.persistence.*;
 import javax.validation.constraints.Digits;
@@ -11,6 +13,8 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+@Getter
+@Setter
 @Entity
 @Inheritance(strategy = InheritanceType.JOINED)
 public class Account {
@@ -47,38 +51,6 @@ public class Account {
         this.penaltyFee = new BigDecimal("40");
     }
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public Money getBalance() {
-        return balance;
-    }
-
-    public void setBalance(Money balance) {
-        this.balance = balance;
-    }
-
-    public List<AccountHolder> getOwners() {
-        return owners;
-    }
-
-    public void setOwners(List<AccountHolder> owners) {
-        this.owners = owners;
-    }
-
-    public BigDecimal getPenaltyFee() {
-        return penaltyFee;
-    }
-
-    public void setPenaltyFee(BigDecimal penaltyFee) {
-        this.penaltyFee = penaltyFee;
-    }
-
     public void addOwner(AccountHolder accountHolder){
         this.owners.add(accountHolder);
     }
@@ -91,21 +63,5 @@ public class Account {
     // TODO -> check if is the same currency
     public void creditBalance(BigDecimal amount){
         this.balance.increaseAmount(amount);
-    }
-
-    public List<Transaction> getOutcomes() {
-        return outcomes;
-    }
-
-    public void setOutcomes(List<Transaction> outcomes) {
-        this.outcomes = outcomes;
-    }
-
-    public List<Transaction> getIncomes() {
-        return incomes;
-    }
-
-    public void setIncomes(List<Transaction> incomes) {
-        this.incomes = incomes;
     }
 }

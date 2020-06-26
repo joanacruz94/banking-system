@@ -10,11 +10,12 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@RequestMapping("/api/accountHolder")
 public class AccountHolderImplementation implements AccountHolderInterface {
     @Autowired
     AccountHolderService accountHolderService;
 
-    @GetMapping("/accountHolder/{id}")
+    @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     public AccountHolder getAccountHolderById(@PathVariable Long id){
         return null;
@@ -26,7 +27,7 @@ public class AccountHolderImplementation implements AccountHolderInterface {
         return null;
     }
 
-    @PostMapping("/accountHolder")
+    @PostMapping("")
     @ResponseStatus(HttpStatus.CREATED)
     public AccountHolder getAccountHolderById(@RequestBody AccountHolderPostDTO accountHolderDTO){
         return null;

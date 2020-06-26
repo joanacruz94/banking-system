@@ -1,5 +1,7 @@
 package com.ironhack.bankSystem.model;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.apache.tomcat.jni.Local;
 
 import javax.persistence.Entity;
@@ -13,6 +15,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
+@Getter
+@Setter
 @Entity
 @PrimaryKeyJoinColumn(name = "account_id")
 public class CreditCardAccount extends Account {
@@ -37,29 +41,5 @@ public class CreditCardAccount extends Account {
         this.interestRate = (interestRate.isPresent()) ? interestRate.get() : new BigDecimal("0.2");
         LocalDate currentDate = LocalDate.now();
         this.debitDate = currentDate.plusYears(1);
-    }
-
-    public BigDecimal getCreditLimit() {
-        return creditLimit;
-    }
-
-    public void setCreditLimit(BigDecimal creditLimit) {
-        this.creditLimit = creditLimit;
-    }
-
-    public BigDecimal getInterestRate() {
-        return interestRate;
-    }
-
-    public void setInterestRate(BigDecimal interestRate) {
-        this.interestRate = interestRate;
-    }
-
-    public LocalDate getDebitDate() {
-        return debitDate;
-    }
-
-    public void setDebitDate(LocalDate debitDate) {
-        this.debitDate = debitDate;
     }
 }

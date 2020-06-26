@@ -1,5 +1,7 @@
 package com.ironhack.bankSystem.model;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.apache.tomcat.jni.Local;
 
 import javax.persistence.Entity;
@@ -9,6 +11,8 @@ import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
+@Getter
+@Setter
 @Entity
 @PrimaryKeyJoinColumn(name = "account_id")
 public class RegularCheckingAccount extends CheckingAccount{
@@ -28,22 +32,6 @@ public class RegularCheckingAccount extends CheckingAccount{
         this.minimumBalance = new BigDecimal("250");
         this.monthlyMaintenanceFee = new BigDecimal("12");
         this.chargeFee = LocalDate.now().plusMonths(1);
-    }
-
-    public BigDecimal getMinimumBalance() {
-        return minimumBalance;
-    }
-
-    public void setMinimumBalance(BigDecimal minimumBalance) {
-        this.minimumBalance = minimumBalance;
-    }
-
-    public BigDecimal getMonthlyMaintenanceFee() {
-        return monthlyMaintenanceFee;
-    }
-
-    public void setMonthlyMaintenanceFee(BigDecimal monthlyMaintenanceFee) {
-        this.monthlyMaintenanceFee = monthlyMaintenanceFee;
     }
 
     public LocalDate getChargeFee() {

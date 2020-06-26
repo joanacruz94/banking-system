@@ -1,6 +1,8 @@
 package com.ironhack.bankSystem.model;
 
 import com.ironhack.bankSystem.enums.Status;
+import lombok.Getter;
+import lombok.Setter;
 
 import javax.persistence.*;
 import javax.validation.constraints.*;
@@ -8,6 +10,8 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Optional;
 
+@Getter
+@Setter
 @Entity
 @PrimaryKeyJoinColumn(name = "account_id")
 public class SavingsAccount extends Account {
@@ -41,46 +45,6 @@ public class SavingsAccount extends Account {
         this.interestRate = (interestRate.isPresent()) ? interestRate.get() : new BigDecimal("0.0025");
         LocalDate currentDate = LocalDate.now();
         this.creditDate = currentDate.plusYears(1);
-    }
-
-    public String getSecretKey() {
-        return secretKey;
-    }
-
-    public void setSecretKey(String secretKey) {
-        this.secretKey = secretKey;
-    }
-
-    public BigDecimal getMinimumBalance() {
-        return minimumBalance;
-    }
-
-    public void setMinimumBalance(BigDecimal minimumBalance) {
-        this.minimumBalance = minimumBalance;
-    }
-
-    public Status getStatus() {
-        return status;
-    }
-
-    public void setStatus(Status status) {
-        this.status = status;
-    }
-
-    public BigDecimal getInterestRate() {
-        return interestRate;
-    }
-
-    public void setInterestRate(BigDecimal interestRate) {
-        this.interestRate = interestRate;
-    }
-
-    public LocalDate getCreditDate() {
-        return creditDate;
-    }
-
-    public void setCreditDate(LocalDate creditDate) {
-        this.creditDate = creditDate;
     }
 
     public void creditInterestRate(){

@@ -1,5 +1,8 @@
 package com.ironhack.bankSystem.model;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import javax.persistence.*;
 import javax.validation.Valid;
 import javax.validation.constraints.Email;
@@ -11,7 +14,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+@Getter
+@Setter
 @Entity
+@PrimaryKeyJoinColumn(name = "user_id")
 public class AccountHolder extends User {
     @NotNull
     @Past
@@ -33,37 +39,5 @@ public class AccountHolder extends User {
         this.primaryAddress = primaryAddress;
         this.mailingAddress = mailingAddress.get();
         this.accounts = new ArrayList<>();
-    }
-
-    public LocalDate getDateOfBirth() {
-        return dateOfBirth;
-    }
-
-    public void setDateOfBirth(LocalDate dateOfBirth) {
-        this.dateOfBirth = dateOfBirth;
-    }
-
-    public Address getPrimaryAddress() {
-        return primaryAddress;
-    }
-
-    public void setPrimaryAddress(Address primaryAddress) {
-        this.primaryAddress = primaryAddress;
-    }
-
-    public String getMailingAddress() {
-        return mailingAddress;
-    }
-
-    public void setMailingAddress(String mailingAddress) {
-        this.mailingAddress = mailingAddress;
-    }
-
-    public List<Account> getAccounts() {
-        return accounts;
-    }
-
-    public void setAccounts(List<Account> accounts) {
-        this.accounts = accounts;
     }
 }

@@ -1,6 +1,8 @@
 package com.ironhack.bankSystem.model;
 
 import com.ironhack.bankSystem.enums.Status;
+import lombok.Getter;
+import lombok.Setter;
 
 import javax.persistence.Column;
 import javax.persistence.EnumType;
@@ -10,6 +12,8 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.math.BigDecimal;
 
+@Getter
+@Setter
 @MappedSuperclass
 public abstract class CheckingAccount extends Account {
     @NotNull
@@ -24,21 +28,5 @@ public abstract class CheckingAccount extends Account {
         super(balance, currency);
         this.secretKey = secretKey;
         this.status = Status.ACTIVE;
-    }
-
-    public String getSecretKey() {
-        return secretKey;
-    }
-
-    public void setSecretKey(String secretKey) {
-        this.secretKey = secretKey;
-    }
-
-    public Status getStatus() {
-        return status;
-    }
-
-    public void setStatus(Status status) {
-        this.status = status;
     }
 }

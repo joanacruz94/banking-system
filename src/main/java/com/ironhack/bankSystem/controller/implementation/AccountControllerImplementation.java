@@ -14,11 +14,12 @@ import java.math.BigDecimal;
 import java.util.List;
 
 @RestController
+@RequestMapping("/api/account")
 public class AccountControllerImplementation implements AccountControllerInterface {
     @Autowired
     AccountService accountService;
 
-    @GetMapping("/account/{id}")
+    @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     public Account getAccountById(@PathVariable Long id){
         return null;
@@ -38,43 +39,43 @@ public class AccountControllerImplementation implements AccountControllerInterfa
         return null;
     }
 
-    @PostMapping("/account/checkingAccount")
+    @PostMapping("/checkingAccount")
     @ResponseStatus(HttpStatus.CREATED)
     public CheckingAccountGetDTO createCheckingAccount(@RequestBody CheckingAccountPostDTO accountDTO){
         return null;
     }
 
-    @PostMapping("/account/savingsAccount")
+    @PostMapping("/savingsAccount")
     @ResponseStatus(HttpStatus.CREATED)
     public SavingsAccountGetDTO createSavingsAccount(@RequestBody SavingsAccountPostDTO accountDTO){
         return null;
     }
 
-    @PostMapping("/account/creditAccount")
+    @PostMapping("/creditAccount")
     @ResponseStatus(HttpStatus.CREATED)
     public CreditCardAccountGetDTO createCreditAccount(@RequestBody CreditCardAccountPostDTO accountDTO){
         return null;
     }
 
-    @GetMapping("/account/{id}/balance")
+    @GetMapping("/{id}/balance")
     @ResponseStatus(HttpStatus.OK)
     public String getBalanceAccount(@PathVariable Long id){
         return null;
     }
 
-    @PatchMapping("/account/{id}/credit/{amount}")
+    @PatchMapping("/{id}/credit/{amount}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public String creditAccount(@PathVariable Long id, @PathVariable BigDecimal amount){
         return null;
     }
 
-    @PatchMapping("/account/{id}/debit/{amount}")
+    @PatchMapping("/{id}/debit/{amount}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public String debitAccount(@PathVariable Long id, @PathVariable BigDecimal amount){
         return null;
     }
 
-    @PostMapping("/account/transaction")
+    @PostMapping("/transaction")
     @ResponseStatus(HttpStatus.CREATED)
     public TransactionGetDTO executeTransaction(@RequestBody TransactionPostDTO transactionDTO){
         return null;

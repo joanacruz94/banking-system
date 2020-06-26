@@ -1,13 +1,21 @@
 package com.ironhack.bankSystem.model;
 
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.MappedSuperclass;
-import javax.validation.constraints.NotNull;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-@MappedSuperclass
-public abstract class User {
+import javax.persistence.*;
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotNull;
+import java.util.HashSet;
+import java.util.Set;
+
+@Getter
+@Setter
+@NoArgsConstructor
+@Entity
+@Inheritance(strategy = InheritanceType.JOINED)
+public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -15,7 +23,19 @@ public abstract class User {
     @NotNull
     private String name;
 
-    public User(String name) {
+    @NotNull
+    @Email
+    private String username;
+
+    @NotNull
+    private String password;
+
+    @OneToMany(mappedBy = "userRole")
+    private Set<Role> roles = new HashSet<>();
+
+    public User(String name, String username, String password) {
         this.name = name;
+        this.username = username;
+        this.password = password;
     }
 }

@@ -72,7 +72,8 @@ public class Scheduler {
     @Scheduled(cron = "0 0 12 * * ?")
     public void checkFraud() {
         // Get all accounts
-        // To which account check if
+        // To which account check ifUser
+
     }
 
 }

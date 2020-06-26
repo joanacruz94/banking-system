@@ -4,9 +4,8 @@ import com.ironhack.bankSystem.dto.CheckingAccountPostDTO;
 import com.ironhack.bankSystem.dto.CreditCardAccountPostDTO;
 import com.ironhack.bankSystem.dto.SavingsAccountPostDTO;
 import com.ironhack.bankSystem.dto.TransactionGetDTO;
-import com.ironhack.bankSystem.exceptions.AccountHolderNotFound;
-import com.ironhack.bankSystem.exceptions.InexistingAccountException;
-import com.ironhack.bankSystem.exceptions.NotEnoughFundsException;
+import com.ironhack.bankSystem.exceptions.AppException;
+import com.ironhack.bankSystem.exceptions.NotFoundException;
 import com.ironhack.bankSystem.model.*;
 import com.ironhack.bankSystem.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,14 +41,14 @@ public class AccountService {
     public Account createCheckingAccount(CheckingAccountPostDTO accountDTO){
         Long primaryOwnerID = accountDTO.getPrimaryOwnerID();
         Long secondaryOwnerID = accountDTO.getSecondaryOwnerID().isPresent() ? accountDTO.getSecondaryOwnerID().get() : null;
-        AccountHolder primaryOwner = accountHolderRepository.findById(primaryOwnerID).orElseThrow(() -> new AccountHolderNotFound("Primary account holder ID doesn't exist!"));
+        AccountHolder primaryOwner = accountHolderRepository.findById(primaryOwnerID).orElseThrow(() -> new NotFoundException("Primary account holder ID doesn't exist!"));
         AccountHolder secondaryOwner = null;
         Account createdAccount;
         RegularCheckingAccount regularCheckingAcc = null;
         StudentCheckingAccount studentCheckingAcc = null;
 
         if (secondaryOwnerID != null) {
-            secondaryOwner = accountHolderRepository.findById(secondaryOwnerID).orElseThrow(() -> new AccountHolderNotFound("Secondary account holder ID doesn't exist!"));
+            secondaryOwner = accountHolderRepository.findById(secondaryOwnerID).orElseThrow(() -> new NotFoundException("Secondary account holder ID doesn't exist!"));
         }
 
         LocalDate currentDate = LocalDate.now();
@@ -76,11 +75,11 @@ public class AccountService {
     public Account createCreditCard(CreditCardAccountPostDTO accountDTO){
         Long primaryOwnerID = accountDTO.getPrimaryOwnerID();
         Long secondaryOwnerID = accountDTO.getSecondaryOwnerID().isPresent() ? accountDTO.getSecondaryOwnerID().get() : null;
-        AccountHolder primaryOwner = accountHolderRepository.findById(primaryOwnerID).orElseThrow(() -> new AccountHolderNotFound("Primary account holder ID doesn't exist!"));
+        AccountHolder primaryOwner = accountHolderRepository.findById(primaryOwnerID).orElseThrow(() -> new NotFoundException("Primary account holder ID doesn't exist!"));
         AccountHolder secondaryOwner = null;
 
         if (secondaryOwnerID != null) {
-            secondaryOwner = accountHolderRepository.findById(secondaryOwnerID).orElseThrow(() -> new AccountHolderNotFound("Secondary account holder ID doesn't exist!"));
+            secondaryOwner = accountHolderRepository.findById(secondaryOwnerID).orElseThrow(() -> new NotFoundException("Secondary account holder ID doesn't exist!"));
         }
 
         CreditCardAccount creditAccount = new CreditCardAccount(accountDTO.getBalance(), accountDTO.getCurrency(), accountDTO.getCreditLimit(), accountDTO.getInterestRate());
@@ -93,11 +92,11 @@ public class AccountService {
     public Account createCreditCard(SavingsAccountPostDTO accountDTO){
         Long primaryOwnerID = accountDTO.getPrimaryOwnerID();
         Long secondaryOwnerID = accountDTO.getSecondaryOwnerID().isPresent() ? accountDTO.getSecondaryOwnerID().get() : null;
-        AccountHolder primaryOwner = accountHolderRepository.findById(primaryOwnerID).orElseThrow(() -> new AccountHolderNotFound("Primary account holder ID doesn't exist!"));
+        AccountHolder primaryOwner = accountHolderRepository.findById(primaryOwnerID).orElseThrow(() -> new NotFoundException("Primary account holder ID doesn't exist!"));
         AccountHolder secondaryOwner = null;
 
         if (secondaryOwnerID != null) {
-            secondaryOwner = accountHolderRepository.findById(secondaryOwnerID).orElseThrow(() -> new AccountHolderNotFound("Secondary account holder ID doesn't exist!"));
+            secondaryOwner = accountHolderRepository.findById(secondaryOwnerID).orElseThrow(() -> new NotFoundException("Secondary account holder ID doesn't exist!"));
         }
 
         SavingsAccount savingsAccount = new SavingsAccount(accountDTO.getBalance(), accountDTO.getCurrency(), accountDTO.getSecretKey(), accountDTO.getMinimumBalance(), accountDTO.getInterestRate());
@@ -111,8 +110,8 @@ public class AccountService {
     public TransactionGetDTO transaction(Long accountIDFrom, Long accountIDTo, BigDecimal amount){
         if(accountIDFrom == accountIDTo) throw new RuntimeException("You are trying to transfer to the same account");
 
-        Account accountFrom = accountRepository.findById(accountIDFrom).orElseThrow(() -> new InexistingAccountException("Account that you tying to transfer from doesn't exist"));
-        Account accountTo = accountRepository.findById(accountIDTo).orElseThrow(() -> new InexistingAccountException("Account that you tying to transfer to doesn't exist"));
+        Account accountFrom = accountRepository.findById(accountIDFrom).orElseThrow(() -> new NotFoundException("Account that you tying to transfer from doesn't exist"));
+        Account accountTo = accountRepository.findById(accountIDTo).orElseThrow(() -> new NotFoundException("Account that you tying to transfer to doesn't exist"));
 
         List<Transaction> transactions = accountFrom.getIncomes();
         Transaction lastTransaction = transactions.get(transactions.size() - 1);
@@ -122,7 +121,7 @@ public class AccountService {
                 accountFrom.debitBalance(amount);
                 accountTo.creditBalance(amount);
             } else
-                throw new NotEnoughFundsException("Account from doesn' have enough funds to execute the transaction");
+                throw new AppException("Account from doesn' have enough funds to execute the transaction");
         } else {
             // Freeze account
         }
@@ -131,17 +130,17 @@ public class AccountService {
     }
 
     public String showSavingsAccountBalance(Long id){
-        SavingsAccount account = savingsAccountRepository.findById(id).orElseThrow(() -> new InexistingAccountException("Account ID doesn't exist in the system"));
+        SavingsAccount account = savingsAccountRepository.findById(id).orElseThrow(() -> new NotFoundException("Account ID doesn't exist in the system"));
         return account.getBalance().toString();
     }
 
     public String showCheckingAccountBalance(Long id){
-        RegularCheckingAccount account = regularCheckingAccountRepository.findById(id).orElseThrow(() -> new InexistingAccountException("Account ID doesn't exist in the system"));
+        RegularCheckingAccount account = regularCheckingAccountRepository.findById(id).orElseThrow(() -> new NotFoundException("Account ID doesn't exist in the system"));
         return account.getBalance().toString();
     }
 
     public String showStudentCheckingAccountBalance(Long id){
-        StudentCheckingAccount account = studentCheckingAccountRepository.findById(id).orElseThrow(() -> new InexistingAccountException("Account ID doesn't exist in the system"));
+        StudentCheckingAccount account = studentCheckingAccountRepository.findById(id).orElseThrow(() -> new NotFoundException("Account ID doesn't exist in the system"));
         return account.getBalance().toString();
     }
 }

@@ -1,10 +1,15 @@
 package com.ironhack.bankSystem.model;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+@Getter
+@Setter
 @Entity
 public class Transaction {
     @Id
@@ -30,45 +35,5 @@ public class Transaction {
         this.accountTo = accountTo;
         this.amount = amount;
         this.transactionDate = LocalDateTime.now();
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public Account getAccountFrom() {
-        return accountFrom;
-    }
-
-    public void setAccountFrom(Account accountFrom) {
-        this.accountFrom = accountFrom;
-    }
-
-    public Account getAccountTo() {
-        return accountTo;
-    }
-
-    public void setAccountTo(Account accountTo) {
-        this.accountTo = accountTo;
-    }
-
-    public BigDecimal getAmount() {
-        return amount;
-    }
-
-    public void setAmount(BigDecimal amount) {
-        this.amount = amount;
-    }
-
-    public LocalDateTime getTransactionDate() {
-        return transactionDate;
-    }
-
-    public void setTransactionDate(LocalDateTime transactionDate) {
-        this.transactionDate = transactionDate;
     }
 }
