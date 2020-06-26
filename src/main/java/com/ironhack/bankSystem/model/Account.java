@@ -36,10 +36,10 @@ public class Account {
     protected BigDecimal penaltyFee;
 
     @OneToMany(mappedBy = "accountFrom")
-    protected List<Transaction> transactionsSent;
+    protected List<Transaction> outcomes;
 
     @OneToMany(mappedBy = "accountTo")
-    protected List<Transaction> transactionsReceived;
+    protected List<Transaction> incomes;
 
     public Account(BigDecimal balance, String currency) {
         this.balance = new Money(balance, currency);
@@ -91,5 +91,21 @@ public class Account {
     // TODO -> check if is the same currency
     public void creditBalance(BigDecimal amount){
         this.balance.increaseAmount(amount);
+    }
+
+    public List<Transaction> getOutcomes() {
+        return outcomes;
+    }
+
+    public void setOutcomes(List<Transaction> outcomes) {
+        this.outcomes = outcomes;
+    }
+
+    public List<Transaction> getIncomes() {
+        return incomes;
+    }
+
+    public void setIncomes(List<Transaction> incomes) {
+        this.incomes = incomes;
     }
 }

@@ -3,7 +3,7 @@ package com.ironhack.bankSystem.service;
 import com.ironhack.bankSystem.dto.CheckingAccountPostDTO;
 import com.ironhack.bankSystem.dto.CreditCardAccountPostDTO;
 import com.ironhack.bankSystem.dto.SavingsAccountPostDTO;
-import com.ironhack.bankSystem.dto.TransactionDTO;
+import com.ironhack.bankSystem.dto.TransactionGetDTO;
 import com.ironhack.bankSystem.exceptions.AccountHolderNotFound;
 import com.ironhack.bankSystem.exceptions.InexistingAccountException;
 import com.ironhack.bankSystem.exceptions.NotEnoughFundsException;
@@ -14,7 +14,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import javax.transaction.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.Period;
+import java.time.temporal.ChronoUnit;
+import java.util.List;
 
 public class AccountService {
 
@@ -105,16 +108,24 @@ public class AccountService {
     }
 
     @Transactional
-    public TransactionDTO transaction(Long accountIDFrom, Long accountIDTo, BigDecimal amount){
+    public TransactionGetDTO transaction(Long accountIDFrom, Long accountIDTo, BigDecimal amount){
         if(accountIDFrom == accountIDTo) throw new RuntimeException("You are trying to transfer to the same account");
 
         Account accountFrom = accountRepository.findById(accountIDFrom).orElseThrow(() -> new InexistingAccountException("Account that you tying to transfer from doesn't exist"));
         Account accountTo = accountRepository.findById(accountIDTo).orElseThrow(() -> new InexistingAccountException("Account that you tying to transfer to doesn't exist"));
 
-        if(accountFrom.getBalance().getBalance().add(amount).compareTo(BigDecimal.ZERO) >= 0) {
-            accountFrom.debitBalance(amount);
-            accountTo.creditBalance(amount);
-        } else throw new NotEnoughFundsException("Account from doesn' have enough funds to execute the transaction");
+        List<Transaction> transactions = accountFrom.getIncomes();
+        Transaction lastTransaction = transactions.get(transactions.size() - 1);
+        long timeBetween = ChronoUnit.SECONDS.between(lastTransaction.getTransactionDate(), LocalDateTime.now());
+        if(timeBetween > 20) {
+            if (accountFrom.getBalance().getBalance().add(amount).compareTo(BigDecimal.ZERO) >= 0) {
+                accountFrom.debitBalance(amount);
+                accountTo.creditBalance(amount);
+            } else
+                throw new NotEnoughFundsException("Account from doesn' have enough funds to execute the transaction");
+        } else {
+            // Freeze account
+        }
 
         return null;
     }

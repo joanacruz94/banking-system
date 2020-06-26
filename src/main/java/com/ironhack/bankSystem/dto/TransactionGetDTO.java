@@ -1,6 +1,6 @@
 package com.ironhack.bankSystem.dto;
 
-public class TransactionDTO {
+public class TransactionGetDTO {
     private String responseMessage;
 
 }
