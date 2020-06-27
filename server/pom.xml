@@ -9,10 +9,10 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.ironhack</groupId>
-	<artifactId>bankSystem</artifactId>
+	<artifactId>server</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>bankSystem</name>
-	<description>Bank System</description>
+	<name>server</name>
+	<description>Banking System</description>
 	<properties>
 		<java.version>14</java.version>
 		<maven.compiler.source>1.8</maven.compiler.source>
