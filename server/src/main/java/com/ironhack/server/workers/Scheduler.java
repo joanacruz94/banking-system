@@ -1,7 +1,9 @@
 package com.ironhack.server.workers;
 
+import com.ironhack.server.model.CreditCardAccount;
 import com.ironhack.server.model.RegularCheckingAccount;
 import com.ironhack.server.model.SavingsAccount;
+import com.ironhack.server.repository.CreditCardAccountRepository;
 import com.ironhack.server.repository.RegularCheckingAccountRepository;
 import com.ironhack.server.repository.SavingsAccountRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +22,9 @@ public class Scheduler {
     @Autowired
     RegularCheckingAccountRepository regularCheckingAccountRepository;
 
+    @Autowired
+    CreditCardAccountRepository creditCardAccountRepository;
+
     @Scheduled(cron = "0 0 12 * * ?")
     public void creditSavingsAccount() {
         LocalDate currentDate = LocalDate.now();
@@ -31,6 +36,19 @@ public class Scheduler {
                     return acc;
                 }).collect(Collectors.toList());
         savingsAccountRepository.saveAll(updatedAccounts);
+    }
+
+    @Scheduled(cron = "0 0 12 * * ?")
+    public void debitCreditAccounts() {
+        LocalDate currentDate = LocalDate.now();
+        List<CreditCardAccount> accounts = creditCardAccountRepository.findAll();
+        List<CreditCardAccount> updatedAccounts = accounts.stream().filter((acc) -> acc.getDebitDate().isEqual(currentDate))
+                .map((acc) -> {
+                    acc.debitInterestRate();
+                    acc.setDebitDate(currentDate.plusMonths(1));
+                    return acc;
+                }).collect(Collectors.toList());
+        creditCardAccountRepository.saveAll(updatedAccounts);
     }
 
     @Scheduled(cron = "0 0 12 * * ?")

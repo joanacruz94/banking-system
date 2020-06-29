@@ -1,5 +1,6 @@
 package com.ironhack.server.model;
 
+import com.ironhack.server.enums.Status;
 import com.ironhack.server.util.Money;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -37,6 +38,11 @@ public class Account {
     protected List<AccountHolder> owners;
 
     @NotNull
+    @Enumerated(value = EnumType.STRING)
+    @Column(length = 10)
+    private Status status;
+
+    @NotNull
     @Digits(integer = 4, fraction = 2)
     protected BigDecimal penaltyFee;
 
@@ -50,6 +56,7 @@ public class Account {
         this.balance = new Money(balance, currency);
         this.owners = new ArrayList<>();
         this.penaltyFee = new BigDecimal("40");
+        this.status = Status.ACTIVE;
     }
 
     public void addOwner(AccountHolder accountHolder){

@@ -1,5 +1,7 @@
 package com.ironhack.server.util;
 
+import lombok.NoArgsConstructor;
+
 import javax.persistence.Embeddable;
 import javax.validation.constraints.Digits;
 import java.math.BigDecimal;
@@ -7,6 +9,7 @@ import java.math.RoundingMode;
 import java.util.Currency;
 
 @Embeddable
+@NoArgsConstructor
 public class Money implements Transactional {
     private static final Currency USD = Currency.getInstance("USD");
     private static final RoundingMode DEFAULT_ROUNDING = RoundingMode.HALF_EVEN;

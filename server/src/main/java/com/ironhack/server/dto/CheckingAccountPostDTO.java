@@ -1,62 +1,35 @@
 package com.ironhack.server.dto;
 
-import io.swagger.models.auth.In;
+import io.swagger.annotations.ApiModelProperty;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
+import javax.validation.constraints.NotBlank;
 import java.math.BigDecimal;
 import java.util.Optional;
 
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
 public class CheckingAccountPostDTO {
+    @ApiModelProperty(required = true)
     private BigDecimal balance;
+
+    @NotBlank
     private String currency;
+
+    @ApiModelProperty(required = true)
     private Long primaryOwnerID;
-    private Optional<Long> secondaryOwnerID;
+
+    private Long secondaryOwnerID;
+
+    @NotBlank
     private String secretKey;
 
-    public CheckingAccountPostDTO(BigDecimal balance, String currency, Long primaryOwnerID, Optional<Long> secondaryOwnerID, String secretKey) {
-        this.balance = balance;
-        this.currency = currency;
-        this.primaryOwnerID = primaryOwnerID;
-        this.secondaryOwnerID = secondaryOwnerID;
-        this.secretKey = secretKey;
-    }
-
-    public BigDecimal getBalance() {
-        return balance;
-    }
-
-    public void setBalance(BigDecimal balance) {
-        this.balance = balance;
-    }
-
-    public String getCurrency() {
-        return currency;
-    }
-
-    public void setCurrency(String currency) {
-        this.currency = currency;
-    }
-
-    public Long getPrimaryOwnerID() {
-        return primaryOwnerID;
-    }
-
-    public void setPrimaryOwnerID(Long primaryOwnerID) {
-        this.primaryOwnerID = primaryOwnerID;
-    }
-
     public Optional<Long> getSecondaryOwnerID() {
-        return secondaryOwnerID;
-    }
-
-    public void setSecondaryOwnerID(Optional<Long> secondaryOwnerID) {
-        this.secondaryOwnerID = secondaryOwnerID;
-    }
-
-    public String getSecretKey() {
-        return secretKey;
-    }
-
-    public void setSecretKey(String secretKey) {
-        this.secretKey = secretKey;
+        return Optional.ofNullable(secondaryOwnerID);
     }
 }

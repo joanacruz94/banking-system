@@ -1,11 +1,14 @@
 package com.ironhack.server.controller.implementation;
 
 import com.ironhack.server.controller.interfaces.AccountHolderInterface;
-import com.ironhack.server.dto.AccountHolderPostDTO;
+import com.ironhack.server.dto.AccountHolderDTO;
+import com.ironhack.server.dto.SignUpAccountHolderRequest;
 import com.ironhack.server.model.AccountHolder;
 import com.ironhack.server.service.AccountHolderService;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -16,21 +19,27 @@ public class AccountHolderController implements AccountHolderInterface {
     @Autowired
     AccountHolderService accountHolderService;
 
+    @ApiOperation(value = "See information of an account holder user by ID")
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public AccountHolder getAccountHolderById(@PathVariable Long id){
+    public AccountHolderDTO getAccountHolderById(@PathVariable Long id){
         return accountHolderService.findAccountHolderById(id);
     }
 
-    @PostMapping("/accountHolders")
+    @ApiOperation(value = "Check all account holders in the system")
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/accountHolders")
     @ResponseStatus(HttpStatus.CREATED)
-    public List<AccountHolder> getAccountHolders(){
+    public List<AccountHolderDTO> getAccountHolders(){
         return accountHolderService.findAllAccountHolders();
     }
 
+    @ApiOperation(value = "Insert a new account holder user. Method returns the ID generated for the user.")
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("")
     @ResponseStatus(HttpStatus.CREATED)
-    public AccountHolder getAccountHolderById(@RequestBody AccountHolderPostDTO accountHolderDTO){
-        return accountHolderService.createAccountHolder(accountHolderDTO);
+    public Long createAccountHolder(@RequestBody SignUpAccountHolderRequest accountHolderDTO){
+        return accountHolderService.registerAccountHolder(accountHolderDTO);
     }
 }

@@ -10,6 +10,7 @@ import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.MappedSuperclass;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
 import java.math.BigDecimal;
 
 @Getter
@@ -18,16 +19,11 @@ import java.math.BigDecimal;
 @MappedSuperclass
 public abstract class CheckingAccount extends Account {
     @NotNull
+    @Pattern(regexp = "[0-9]{9}")
     private String secretKey;
-
-    @NotNull
-    @Enumerated(value = EnumType.STRING)
-    @Column(length = 10)
-    private Status status;
 
     public CheckingAccount(BigDecimal balance, String currency, String secretKey) {
         super(balance, currency);
         this.secretKey = secretKey;
-        this.status = Status.ACTIVE;
     }
 }

@@ -42,4 +42,8 @@ public class CreditCardAccount extends Account {
         LocalDate currentDate = LocalDate.now();
         this.debitDate = currentDate.plusYears(1);
     }
+
+    public void debitInterestRate(){
+        this.balance.decreaseAmount(this.balance.getBalance().multiply(this.interestRate));
+    }
 }

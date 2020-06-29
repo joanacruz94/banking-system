@@ -1,70 +1,42 @@
 package com.ironhack.server.dto;
 
+import io.swagger.annotations.ApiModelProperty;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+import javax.validation.constraints.NotBlank;
 import java.math.BigDecimal;
 import java.util.Optional;
 
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
 public class CreditCardAccountPostDTO {
+    @ApiModelProperty(required = true)
     private BigDecimal balance;
+
+    @NotBlank
     private String currency;
+
+    @ApiModelProperty(required = true)
     private Long primaryOwnerID;
-    private Optional<Long> secondaryOwnerID;
-    private Optional<BigDecimal> creditLimit;
-    private Optional<BigDecimal> interestRate;
 
-    public CreditCardAccountPostDTO(BigDecimal balance, String currency, Long primaryOwnerID, Optional<Long> secondaryOwnerID, Optional<BigDecimal> creditLimit, Optional<BigDecimal> interestRate) {
-        this.balance = balance;
-        this.currency = currency;
-        this.primaryOwnerID = primaryOwnerID;
-        this.secondaryOwnerID = secondaryOwnerID;
-        this.creditLimit = creditLimit;
-        this.interestRate = interestRate;
-    }
-
-    public BigDecimal getBalance() {
-        return balance;
-    }
-
-    public void setBalance(BigDecimal balance) {
-        this.balance = balance;
-    }
-
-    public String getCurrency() {
-        return currency;
-    }
-
-    public void setCurrency(String currency) {
-        this.currency = currency;
-    }
-
-    public Long getPrimaryOwnerID() {
-        return primaryOwnerID;
-    }
-
-    public void setPrimaryOwnerID(Long primaryOwnerID) {
-        this.primaryOwnerID = primaryOwnerID;
-    }
+    private Long secondaryOwnerID;
+    private BigDecimal creditLimit;
+    private BigDecimal interestRate;
 
     public Optional<Long> getSecondaryOwnerID() {
-        return secondaryOwnerID;
-    }
-
-    public void setSecondaryOwnerID(Optional<Long> secondaryOwnerID) {
-        this.secondaryOwnerID = secondaryOwnerID;
+        return Optional.ofNullable(secondaryOwnerID);
     }
 
     public Optional<BigDecimal> getCreditLimit() {
-        return creditLimit;
-    }
-
-    public void setCreditLimit(Optional<BigDecimal> creditLimit) {
-        this.creditLimit = creditLimit;
+        return Optional.ofNullable(creditLimit);
     }
 
     public Optional<BigDecimal> getInterestRate() {
-        return interestRate;
-    }
-
-    public void setInterestRate(Optional<BigDecimal> interestRate) {
-        this.interestRate = interestRate;
+        return Optional.ofNullable(interestRate);
     }
 }

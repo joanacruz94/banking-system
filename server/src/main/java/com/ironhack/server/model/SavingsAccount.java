@@ -18,6 +18,7 @@ import java.util.Optional;
 @PrimaryKeyJoinColumn(name = "account_id")
 public class SavingsAccount extends Account {
     @NotNull
+    @Pattern(regexp = "[0-9]{9}")
     private String secretKey;
 
     @NotNull
@@ -25,11 +26,6 @@ public class SavingsAccount extends Account {
     @DecimalMax(value = "1000")
     @Digits(integer = 4, fraction = 2)
     private BigDecimal minimumBalance;
-
-    @NotNull
-    @Enumerated(value = EnumType.STRING)
-    @Column(length = 10)
-    private Status status;
 
     @NotNull
     @DecimalMax(value = "0.5")
@@ -43,7 +39,6 @@ public class SavingsAccount extends Account {
         super(balance, currency);
         this.secretKey = secretKey;
         this.minimumBalance = (minimumBalance.isPresent()) ? minimumBalance.get() : new BigDecimal("1000");
-        this.status = Status.ACTIVE;
         this.interestRate = (interestRate.isPresent()) ? interestRate.get() : new BigDecimal("0.0025");
         LocalDate currentDate = LocalDate.now();
         this.creditDate = currentDate.plusYears(1);

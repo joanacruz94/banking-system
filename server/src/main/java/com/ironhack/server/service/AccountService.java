@@ -1,9 +1,7 @@
 package com.ironhack.server.service;
 
-import com.ironhack.server.dto.CheckingAccountPostDTO;
-import com.ironhack.server.dto.CreditCardAccountPostDTO;
-import com.ironhack.server.dto.SavingsAccountPostDTO;
-import com.ironhack.server.dto.TransactionGetDTO;
+import com.ironhack.server.dto.*;
+import com.ironhack.server.enums.Status;
 import com.ironhack.server.exceptions.AppException;
 import com.ironhack.server.exceptions.NotFoundException;
 import com.ironhack.server.model.*;
@@ -11,15 +9,21 @@ import com.ironhack.server.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
 import javax.transaction.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Period;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Currency;
 import java.util.List;
+import java.util.stream.Collectors;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 @Service
 public class AccountService {
@@ -43,11 +47,23 @@ public class AccountService {
     AccountHolderRepository accountHolderRepository;
 
     @Autowired
-    UserService userService;
+    TransactionRepository transactionRepository;
 
-    public Account createCheckingAccount(CheckingAccountPostDTO accountDTO){
+    @Autowired
+    UserRepository userRepository;
+
+    @Autowired
+    PasswordEncoder passwordEncoder;
+
+    private static final Logger LOGGER = LogManager.getLogger(AccountService.class);
+
+    public Long createCheckingAccount(CheckingAccountPostDTO accountDTO){
+        LOGGER.info("[INIT] -> Create a checking account");
         Long primaryOwnerID = accountDTO.getPrimaryOwnerID();
         Long secondaryOwnerID = accountDTO.getSecondaryOwnerID().isPresent() ? accountDTO.getSecondaryOwnerID().get() : null;
+        if(!Currency.getAvailableCurrencies().contains(Currency.getInstance(accountDTO.getCurrency()))) {
+            throw new AppException("Currency doesn't exist");
+        }
         AccountHolder primaryOwner = accountHolderRepository.findById(primaryOwnerID).orElseThrow(() -> new NotFoundException("Primary account holder ID doesn't exist!"));
         AccountHolder secondaryOwner = null;
         Account createdAccount;
@@ -65,21 +81,26 @@ public class AccountService {
         int periodYears = period.getYears();
 
         if (periodYears >= 24) {
-            regularCheckingAcc = new RegularCheckingAccount(accountDTO.getBalance(), accountDTO.getCurrency(), accountDTO.getSecretKey());
+            LOGGER.info("Account will be a regular checking");
+            regularCheckingAcc = new RegularCheckingAccount(accountDTO.getBalance(), accountDTO.getCurrency(), passwordEncoder.encode(accountDTO.getSecretKey()));
             regularCheckingAcc.addOwner(primaryOwner);
             if (secondaryOwner != null) regularCheckingAcc.addOwner(secondaryOwner);
             createdAccount = regularCheckingAccountRepository.save(regularCheckingAcc);
         } else {
+            LOGGER.info("Account will be a student checking");
             studentCheckingAcc = new StudentCheckingAccount(accountDTO.getBalance(), accountDTO.getCurrency(), accountDTO.getSecretKey());
             studentCheckingAcc.addOwner(primaryOwner);
             if (secondaryOwner != null) studentCheckingAcc.addOwner(secondaryOwner);
             createdAccount = studentCheckingAccountRepository.save(studentCheckingAcc);
         }
 
-        return createdAccount;
+        LOGGER.info("Successfully created checking account with [ID: {}]", createdAccount.getId());
+
+        return createdAccount.getId();
     }
 
-    public Account createCreditCard(CreditCardAccountPostDTO accountDTO){
+    public Long createCreditCard(CreditCardAccountPostDTO accountDTO){
+        LOGGER.info("[INIT] -> Create a credit account");
         Long primaryOwnerID = accountDTO.getPrimaryOwnerID();
         Long secondaryOwnerID = accountDTO.getSecondaryOwnerID().isPresent() ? accountDTO.getSecondaryOwnerID().get() : null;
         AccountHolder primaryOwner = accountHolderRepository.findById(primaryOwnerID).orElseThrow(() -> new NotFoundException("Primary account holder ID doesn't exist!"));
@@ -93,10 +114,13 @@ public class AccountService {
         creditAccount.addOwner(primaryOwner);
         if (secondaryOwner != null) creditAccount.addOwner(secondaryOwner);
 
-        return creditCardAccountRepository.save(creditAccount);
+        CreditCardAccount createdAccount = creditCardAccountRepository.save(creditAccount);
+        LOGGER.info("Successfully created credit account with [ID: {}]", createdAccount.getId());
+        return createdAccount.getId();
     }
 
-    public Account createSavingsAccount(SavingsAccountPostDTO accountDTO){
+    public Long createSavingsAccount(SavingsAccountPostDTO accountDTO){
+        LOGGER.info("[INIT] -> Create a savings account");
         Long primaryOwnerID = accountDTO.getPrimaryOwnerID();
         Long secondaryOwnerID = accountDTO.getSecondaryOwnerID().isPresent() ? accountDTO.getSecondaryOwnerID().get() : null;
         AccountHolder primaryOwner = accountHolderRepository.findById(primaryOwnerID).orElseThrow(() -> new NotFoundException("Primary account holder ID doesn't exist!"));
@@ -110,48 +134,265 @@ public class AccountService {
         savingsAccount.addOwner(primaryOwner);
         if (secondaryOwner != null) savingsAccount.addOwner(secondaryOwner);
 
-        return savingsAccountRepository.save(savingsAccount);
+        SavingsAccount createdAccount = savingsAccountRepository.save(savingsAccount);
+        LOGGER.info("Successfully created savings account with [ID: {}]", createdAccount.getId());
+        return createdAccount.getId();
     }
 
     @Transactional
-    public TransactionGetDTO transaction(Long accountIDFrom, Long accountIDTo, BigDecimal amount){
-        if(accountIDFrom == accountIDTo) throw new RuntimeException("You are trying to transfer to the same account");
-
-        Account accountFrom = accountRepository.findById(accountIDFrom).orElseThrow(() -> new NotFoundException("Account that you tying to transfer from doesn't exist"));
-        Account accountTo = accountRepository.findById(accountIDTo).orElseThrow(() -> new NotFoundException("Account that you tying to transfer to doesn't exist"));
-
-        List<Transaction> transactions = accountFrom.getIncomes();
-        Transaction lastTransaction = transactions.get(transactions.size() - 1);
-        long timeBetween = ChronoUnit.SECONDS.between(lastTransaction.getTransactionDate(), LocalDateTime.now());
-        if(timeBetween > 20) {
-            if (accountFrom.getBalance().getBalance().add(amount).compareTo(BigDecimal.ZERO) >= 0) {
-                accountFrom.debitBalance(amount);
-                accountTo.creditBalance(amount);
-            } else
-                throw new AppException("Account from doesn' have enough funds to execute the transaction");
-        } else {
-            // Freeze account
+    public TransactionGetDTO transaction(TransactionPostDTO transactionDTO){
+        LOGGER.info("[INIT] -> Transaction started");
+        Transaction transaction;
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        Account accountFrom = accountRepository.findById(transactionDTO.getAccountIDFrom()).orElseThrow(() -> new NotFoundException("Account that you tying to transfer from doesn't exist"));
+        Account accountTo = accountRepository.findById(transactionDTO.getAccountIDTo()).orElseThrow(() -> new NotFoundException("Account that you tying to transfer to doesn't exist"));
+        List<String> ownersNames = accountFrom.getOwners().stream().map(owner -> owner.getEmail()).collect(Collectors.toList());
+        if(!ownersNames.contains(auth.getName())) {
+            LOGGER.error("[ERROR] -> Not authorized");
+            throw new AppException("Not authorized");
+        }
+        if(transactionDTO.getAccountIDFrom() == transactionDTO.getAccountIDTo()) {
+            LOGGER.error("[ERROR] -> Trying to transfer to the same account");
+            throw new AppException("You are trying to transfer to the same account");
         }
 
-        return null;
-    }
-
-    public List<Account> getAccounts(String filter){
-        return accountRepository.findAll();
-    }
-
-    public Account findAccountById(Long id){
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        System.out.println(auth.getDetails() + "DETAILS");
-        System.out.println(auth.getAuthorities() + "ROLES");
-        Account account = accountRepository.findById(id).orElseThrow(() -> new NotFoundException("Account with that ID doesn't exist n the system"));
-        /*if(user.getRoles().contains(RoleName.ROLE_ACCOUNTHOLDER)) {
-            List<AccountHolder> owners = account.getOwners();
-            List<Long> ids = owners.stream().map(owner -> owner.getId()).collect(Collectors.toList());
-            if(!ids.contains(user.getId())) {
-                throw new NotAuthorizeException("User is trying to access one account that is not of his own");
+        List<Transaction> transactions = accountFrom.getIncomes();
+        if(transactions.size() > 0) {
+            Transaction lastTransaction = transactions.get(transactions.size() - 1);
+            long timeBetween = ChronoUnit.SECONDS.between(lastTransaction.getTransactionDate(), LocalDateTime.now());
+            if (timeBetween < 1) {
+                accountFrom.setStatus(Status.FROZEN);
+                accountRepository.save(accountFrom);
+                LOGGER.error("[ERROR] -> Fraud Detection");
+                throw new AppException("Fraud detection: Your account was frozen since transactions are made with one second between");
             }
-        }*/
-        return account;
+        }
+
+        if (accountFrom.getBalance().getBalance().subtract(transactionDTO.getAmount()).compareTo(BigDecimal.ZERO) >= 0) {
+            accountFrom.debitBalance(transactionDTO.getAmount());
+            accountTo.creditBalance(transactionDTO.getAmount());
+            transaction = new Transaction(accountFrom, accountTo, transactionDTO.getAmount());
+            Transaction createdTransaction = transactionRepository.save(transaction);
+            LOGGER.info("Successfully created transaction with [ID: {}]", createdTransaction.getId());
+        } else {
+            LOGGER.error("[ERROR] -> Not enough balance");
+            throw new AppException("Account from doesn't have enough funds to execute the transaction");
+        }
+
+        return new TransactionGetDTO("Success", transaction.getId(), transaction.getAccountFrom().getId(), transaction.getAccountTo().getId(), transaction.getAmount());
+    }
+
+    public List<AccountGetDTO> getRegularCheckingAccounts(){
+        return regularCheckingAccountRepository.findAll().stream().map(acc -> new RegularCheckingAccountGetDTO(
+                acc.getId(),
+                acc.getBalance().getBalance(),
+                acc.getBalance().getCurrency().toString(),
+                acc.getPenaltyFee(),
+                acc.getStatus(),
+                acc.getOwners().stream().map((owner) -> owner.getName()).collect(Collectors.toList()),
+                acc.getSecretKey(),
+                acc.getMinimumBalance(),
+                acc.getMonthlyMaintenanceFee(),
+                acc.getChargeFee()
+        )).collect(Collectors.toList());
+    }
+
+    public List<AccountGetDTO> getStudentCheckingAccounts(){
+        return studentCheckingAccountRepository.findAll().stream().map(acc -> new StudentCheckingAccountGetDTO(
+                acc.getId(),
+                acc.getBalance().getBalance(),
+                acc.getBalance().getCurrency().toString(),
+                acc.getPenaltyFee(),
+                acc.getStatus(),
+                acc.getOwners().stream().map((owner) -> owner.getName()).collect(Collectors.toList()),
+                acc.getSecretKey()
+        )).collect(Collectors.toList());
+    }
+
+    public List<AccountGetDTO> getSavingsAccounts(){
+        return savingsAccountRepository.findAll().stream().map(acc -> new SavingsAccountGetDTO(
+                acc.getId(),
+                acc.getBalance().getBalance(),
+                acc.getBalance().getCurrency().toString(),
+                acc.getPenaltyFee(),
+                acc.getStatus(),
+                acc.getOwners().stream().map((owner) -> owner.getName()).collect(Collectors.toList()),
+                acc.getSecretKey(),
+                acc.getMinimumBalance(),
+                acc.getInterestRate(),
+                acc.getCreditDate()
+        )).collect(Collectors.toList());
+    }
+
+    public List<AccountGetDTO> getCreditAccounts(){
+        return creditCardAccountRepository.findAll().stream().map(acc -> new CreditCardAccountGetDTO(
+                acc.getId(),
+                acc.getBalance().getBalance(),
+                acc.getBalance().getCurrency().toString(),
+                acc.getPenaltyFee(),
+                acc.getStatus(),
+                acc.getOwners().stream().map((owner) -> owner.getName()).collect(Collectors.toList()),
+                acc.getCreditLimit(),
+                acc.getInterestRate(),
+                acc.getDebitDate()
+        )).collect(Collectors.toList());
+    }
+
+    public List<AccountGetDTO> getUserAccounts(Long ownerID){
+        List<Object[]> accounts = accountRepository.findUserAccounts(ownerID);
+        return accounts.stream().map(account -> new AccountGetDTO(
+                Long.parseLong(account[0].toString()),
+                new BigDecimal(account[1].toString()),
+                account[2].toString(),
+                new BigDecimal(account[3].toString()),
+                Status.valueOf(account[4].toString()),
+                Arrays.asList(account[5].toString())
+        )).collect(Collectors.toList());
+    }
+
+    public List<AccountGetDTO> getAccounts(String filter){
+        LOGGER.info("[INIT] -> Find all accounts");
+        List<AccountGetDTO> accountsList = new ArrayList<>();
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if(auth.getAuthorities().toArray()[0].toString().equals("ROLE_ADMIN")) {
+            if (!filter.isEmpty()) {
+                switch (filter) {
+                    case "regularChecking":
+                        accountsList = getRegularCheckingAccounts();
+                        break;
+                    case "studentChecking":
+                        accountsList = getStudentCheckingAccounts();
+                        break;
+                    case "savings":
+                        accountsList = getSavingsAccounts();
+                        break;
+                    case "credit":
+                        accountsList = getCreditAccounts();
+                        break;
+                    default:
+                        return accountsList;
+                }
+            } else {
+                accountsList.addAll(getRegularCheckingAccounts());
+                accountsList.addAll(getStudentCheckingAccounts());
+                accountsList.addAll(getSavingsAccounts());
+                accountsList.addAll(getCreditAccounts());
+            }
+        } else if(auth.getAuthorities().toArray()[0].toString().equals("ROLE_ACCOUNTHOLDER")) {
+            User user = userRepository.findByEmail(auth.getName()).orElseThrow(() -> new AppException("Error"));
+            Long userID = user.getId();
+            return getUserAccounts(userID);
+        } else {
+            LOGGER.error("[ERROR] -> Not authorized");
+            throw new AppException("You are a third party user so you are not authorized to check accounts");
+        }
+
+        return accountsList;
+    }
+
+    public AccountGetDTO findAccountById(Long id){
+        LOGGER.info("[INIT] -> Find account");
+        AccountGetDTO accountGetDTO = null;
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        RegularCheckingAccount regularCheckingAccount = regularCheckingAccountRepository.findById(id).isPresent() ? regularCheckingAccountRepository.findById(id).get() : null;
+        StudentCheckingAccount studentCheckingAccount = studentCheckingAccountRepository.findById(id).isPresent() ? studentCheckingAccountRepository.findById(id).get() : null;
+        SavingsAccount savingsAccount = savingsAccountRepository.findById(id).isPresent() ? savingsAccountRepository.findById(id).get() : null;
+        CreditCardAccount creditAccount = creditCardAccountRepository.findById(id).isPresent() ? creditCardAccountRepository.findById(id).get() : null;
+        if(regularCheckingAccount != null) {
+            LOGGER.info("Account is regular checking type");
+            accountGetDTO = new RegularCheckingAccountGetDTO(
+                    regularCheckingAccount.getId(),
+                    regularCheckingAccount.getBalance().getBalance(),
+                    regularCheckingAccount.getBalance().getCurrency().toString(),
+                    regularCheckingAccount.getPenaltyFee(),
+                    regularCheckingAccount.getStatus(),
+                    regularCheckingAccount.getOwners().stream().map((owner) -> owner.getName()).collect(Collectors.toList()),
+                    regularCheckingAccount.getSecretKey(),
+                    regularCheckingAccount.getMinimumBalance(),
+                    regularCheckingAccount.getMonthlyMaintenanceFee(),
+                    regularCheckingAccount.getChargeFee()
+            );
+        } else if(creditAccount != null) {
+            LOGGER.info("Account is credit type");
+            accountGetDTO = new CreditCardAccountGetDTO(
+                        creditAccount.getId(),
+                        creditAccount.getBalance().getBalance(),
+                        creditAccount.getBalance().getCurrency().toString(),
+                        creditAccount.getPenaltyFee(),
+                        creditAccount.getStatus(),
+                        creditAccount.getOwners().stream().map((owner) -> owner.getName()).collect(Collectors.toList()),
+                        creditAccount.getCreditLimit(),
+                        creditAccount.getInterestRate(),
+                        creditAccount.getDebitDate());
+        } else if(studentCheckingAccount != null) {
+            LOGGER.info("Account is student type");
+            accountGetDTO = new StudentCheckingAccountGetDTO(
+                    studentCheckingAccount.getId(),
+                    studentCheckingAccount.getBalance().getBalance(),
+                    studentCheckingAccount.getBalance().getCurrency().toString(),
+                    studentCheckingAccount.getPenaltyFee(),
+                    studentCheckingAccount.getStatus(),
+                    studentCheckingAccount.getOwners().stream().map((owner) -> owner.getName()).collect(Collectors.toList()),
+                    studentCheckingAccount.getSecretKey()
+            );
+        } else if(savingsAccount != null) {
+            LOGGER.info("Account is savings type");
+            accountGetDTO = new SavingsAccountGetDTO(
+                    savingsAccount.getId(),
+                    savingsAccount.getBalance().getBalance(),
+                    savingsAccount.getBalance().getCurrency().toString(),
+                    savingsAccount.getPenaltyFee(),
+                    savingsAccount.getStatus(),
+                    savingsAccount.getOwners().stream().map((owner) -> owner.getName()).collect(Collectors.toList()),
+                    savingsAccount.getSecretKey(),
+                    savingsAccount.getMinimumBalance(),
+                    savingsAccount.getInterestRate(),
+                    savingsAccount.getCreditDate()
+            );
+        }
+
+        if(accountGetDTO == null) {
+            LOGGER.error("[ERROR] -> Account is not found");
+            throw new NotFoundException("Account with that ID doesn't exist in the system");
+        } else {
+            List<String> ownersNames = accountGetDTO.getOwnersNames();
+            User user = userRepository.findByEmail(auth.getName()).orElseThrow(() -> new NotFoundException("Error"));
+            if(auth.getAuthorities().toArray()[0].toString().equals("ROLE_ACCOUNTHOLDER") && !ownersNames.contains(user.getName())) {
+                LOGGER.error("[ERROR] -> Not authorized");
+                throw new AppException("You cannot see information of an account that isn't yours!");
+            }
+        }
+
+        return accountGetDTO;
+    }
+
+    public void creditAccount(Long accountID, BigDecimal amount){
+        LOGGER.info("[INIT] -> Credit account");
+        Account account = accountRepository.findById(accountID).orElseThrow(() -> new NotFoundException("Account with that ID doesn't exist in the system"));
+        account.creditBalance(amount);
+        accountRepository.save(account);
+    }
+
+    public void debitAccount(Long accountID, BigDecimal amount){
+        LOGGER.info("[INIT] -> Debit account");
+        Account account = accountRepository.findById(accountID).orElseThrow(() -> new NotFoundException("Account with that ID doesn't exist in the system"));
+        if (account.getBalance().getBalance().add(amount).compareTo(BigDecimal.ZERO) >= 0) {
+            account.debitBalance(amount);
+            accountRepository.save(account);
+        } else
+            throw new AppException("Account doesn't have enough funds");
+    }
+
+    public BigDecimal getBalanceAccount(Long accountID){
+        LOGGER.info("[INIT] -> Check account balance");
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        Account account = accountRepository.findById(accountID).orElseThrow(() -> new NotFoundException("Account with that ID doesn't exist in the system"));
+        List<String> ownersNames = account.getOwners().stream().map(owner -> owner.getName()).collect(Collectors.toList());
+        User user = userRepository.findByEmail(auth.getName()).orElseThrow(() -> new NotFoundException("Error"));
+        if(auth.getAuthorities().toArray()[0].toString().equals("ROLE_ACCOUNTHOLDER") && !ownersNames.contains(user.getName())) {
+            LOGGER.error("[ERROR] -> Not authorized");
+            throw new AppException("You cannot see information of an account that isn't yours!");
+        }
+        return account.getBalance().getBalance();
     }
 }

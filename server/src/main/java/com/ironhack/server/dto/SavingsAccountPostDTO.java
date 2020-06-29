@@ -1,80 +1,45 @@
 package com.ironhack.server.dto;
 
+import io.swagger.annotations.ApiModelProperty;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+import javax.validation.constraints.NotBlank;
 import java.math.BigDecimal;
 import java.util.Optional;
 
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
 public class SavingsAccountPostDTO {
+    @ApiModelProperty(required = true)
     private BigDecimal balance;
+
+    @NotBlank
     private String currency;
+
+    @ApiModelProperty(required = true)
     private Long primaryOwnerID;
-    private Optional<Long> secondaryOwnerID;
-    private Optional<BigDecimal> interestRate;
-    private Optional<BigDecimal> minimumBalance;
+
+    private Long secondaryOwnerID;
+    private BigDecimal interestRate;
+    private BigDecimal minimumBalance;
+
+    @NotBlank
     private String secretKey;
 
-    public SavingsAccountPostDTO(BigDecimal balance, String currency, Long primaryOwnerID, Optional<Long> secondaryOwnerID, Optional<BigDecimal> interestRate, Optional<BigDecimal> minimumBalance, String secretKey) {
-        this.balance = balance;
-        this.currency = currency;
-        this.primaryOwnerID = primaryOwnerID;
-        this.secondaryOwnerID = secondaryOwnerID;
-        this.interestRate = interestRate;
-        this.minimumBalance = minimumBalance;
-        this.secretKey = secretKey;
-    }
-
-    public BigDecimal getBalance() {
-        return balance;
-    }
-
-    public void setBalance(BigDecimal balance) {
-        this.balance = balance;
-    }
-
-    public String getCurrency() {
-        return currency;
-    }
-
-    public void setCurrency(String currency) {
-        this.currency = currency;
-    }
-
-    public Long getPrimaryOwnerID() {
-        return primaryOwnerID;
-    }
-
-    public void setPrimaryOwnerID(Long primaryOwnerID) {
-        this.primaryOwnerID = primaryOwnerID;
-    }
-
     public Optional<Long> getSecondaryOwnerID() {
-        return secondaryOwnerID;
-    }
-
-    public void setSecondaryOwnerID(Optional<Long> secondaryOwnerID) {
-        this.secondaryOwnerID = secondaryOwnerID;
+        return Optional.ofNullable(secondaryOwnerID);
     }
 
     public Optional<BigDecimal> getInterestRate() {
-        return interestRate;
-    }
-
-    public void setInterestRate(Optional<BigDecimal> interestRate) {
-        this.interestRate = interestRate;
+        return Optional.ofNullable(interestRate);
     }
 
     public Optional<BigDecimal> getMinimumBalance() {
-        return minimumBalance;
-    }
-
-    public void setMinimumBalance(Optional<BigDecimal> minimumBalance) {
-        this.minimumBalance = minimumBalance;
-    }
-
-    public String getSecretKey() {
-        return secretKey;
-    }
-
-    public void setSecretKey(String secretKey) {
-        this.secretKey = secretKey;
+        return Optional.ofNullable(minimumBalance);
     }
 }

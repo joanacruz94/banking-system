@@ -1,7 +1,10 @@
 package com.ironhack.server.security;
 
+import com.ironhack.server.service.ThirdPartyService;
 import io.jsonwebtoken.*;
 import lombok.extern.log4j.Log4j;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
@@ -17,6 +20,8 @@ public class JwtTokenProvider {
 
     @Value("${app.jwtExpirationInMs}")
     private int jwtExpirationInMs;
+
+    private static final Logger LOGGER = LogManager.getLogger(ThirdPartyService.class);
 
     public String generateToken(Authentication authentication) {
 
@@ -47,15 +52,15 @@ public class JwtTokenProvider {
             Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(authToken);
             return true;
         } catch (SignatureException ex) {
-            // log.error("Invalid JWT signature");
+            LOGGER.error("Invalid JWT signature");
         } catch (MalformedJwtException ex) {
-            // log.error("Invalid JWT token");
+            LOGGER.error("Invalid JWT token");
         } catch (ExpiredJwtException ex) {
-            // log.error("Expired JWT token");
+            LOGGER.error("Expired JWT token");
         } catch (UnsupportedJwtException ex) {
-            // log.error("Unsupported JWT token");
+            LOGGER.error("Unsupported JWT token");
         } catch (IllegalArgumentException ex) {
-            // log.error("JWT claims string is empty.");
+            LOGGER.error("JWT claims string is empty.");
         }
         return false;
     }
