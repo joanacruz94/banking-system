@@ -14,5 +14,5 @@ public interface AccountRepository extends JpaRepository<Account, Long> {
             "JOIN user u ON ah.user_id = u.id\n" +
             "WHERE ah.user_id = :userID",
             nativeQuery = true)
-    public List<Object[]> findUserAccounts(Long userID);
+    List<Object[]> findUserAccounts(Long userID);
 }

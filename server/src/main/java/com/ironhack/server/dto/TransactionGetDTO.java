@@ -12,9 +12,9 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @AllArgsConstructor
 public class TransactionGetDTO {
-    private String responseMessage;
     private Long transactionID;
     private Long accountIDFrom;
     private Long accountIDTo;
     private BigDecimal amount;
+    private String executedDate;
 }

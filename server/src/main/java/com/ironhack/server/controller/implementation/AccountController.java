@@ -2,7 +2,6 @@ package com.ironhack.server.controller.implementation;
 
 import com.ironhack.server.controller.interfaces.AccountInterface;
 import com.ironhack.server.dto.*;
-import com.ironhack.server.model.Account;
 import com.ironhack.server.service.AccountService;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,7 +11,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/account")
@@ -126,13 +124,6 @@ public class AccountController implements AccountInterface {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void debitAccount(@PathVariable Long id, @PathVariable BigDecimal amount){
         accountService.debitAccount(id, amount);
-    }
-
-    @PreAuthorize("hasRole('ACCOUNTHOLDER')")
-    @PostMapping("/transaction")
-    @ResponseStatus(HttpStatus.CREATED)
-    public TransactionGetDTO executeTransaction(@RequestBody TransactionPostDTO transactionDTO){
-        return accountService.transaction(transactionDTO);
     }
 
 }

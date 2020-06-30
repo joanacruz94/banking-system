@@ -17,5 +17,4 @@ public interface AccountInterface {
     BigDecimal getBalanceAccount(Long id);
     void creditAccount(Long id, BigDecimal amount);
     void debitAccount(Long id, BigDecimal amount);
-    TransactionGetDTO executeTransaction(TransactionPostDTO transactionDTO);
 }

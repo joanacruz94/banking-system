@@ -47,9 +47,6 @@ public class AccountService {
     AccountHolderRepository accountHolderRepository;
 
     @Autowired
-    TransactionRepository transactionRepository;
-
-    @Autowired
     UserRepository userRepository;
 
     @Autowired
@@ -137,49 +134,6 @@ public class AccountService {
         SavingsAccount createdAccount = savingsAccountRepository.save(savingsAccount);
         LOGGER.info("Successfully created savings account with [ID: {}]", createdAccount.getId());
         return createdAccount.getId();
-    }
-
-    @Transactional
-    public TransactionGetDTO transaction(TransactionPostDTO transactionDTO){
-        LOGGER.info("[INIT] -> Transaction started");
-        Transaction transaction;
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        Account accountFrom = accountRepository.findById(transactionDTO.getAccountIDFrom()).orElseThrow(() -> new NotFoundException("Account that you tying to transfer from doesn't exist"));
-        Account accountTo = accountRepository.findById(transactionDTO.getAccountIDTo()).orElseThrow(() -> new NotFoundException("Account that you tying to transfer to doesn't exist"));
-        List<String> ownersNames = accountFrom.getOwners().stream().map(owner -> owner.getEmail()).collect(Collectors.toList());
-        if(!ownersNames.contains(auth.getName())) {
-            LOGGER.error("[ERROR] -> Not authorized");
-            throw new AppException("Not authorized");
-        }
-        if(transactionDTO.getAccountIDFrom() == transactionDTO.getAccountIDTo()) {
-            LOGGER.error("[ERROR] -> Trying to transfer to the same account");
-            throw new AppException("You are trying to transfer to the same account");
-        }
-
-        List<Transaction> transactions = accountFrom.getIncomes();
-        if(transactions.size() > 0) {
-            Transaction lastTransaction = transactions.get(transactions.size() - 1);
-            long timeBetween = ChronoUnit.SECONDS.between(lastTransaction.getTransactionDate(), LocalDateTime.now());
-            if (timeBetween < 1) {
-                accountFrom.setStatus(Status.FROZEN);
-                accountRepository.save(accountFrom);
-                LOGGER.error("[ERROR] -> Fraud Detection");
-                throw new AppException("Fraud detection: Your account was frozen since transactions are made with one second between");
-            }
-        }
-
-        if (accountFrom.getBalance().getBalance().subtract(transactionDTO.getAmount()).compareTo(BigDecimal.ZERO) >= 0) {
-            accountFrom.debitBalance(transactionDTO.getAmount());
-            accountTo.creditBalance(transactionDTO.getAmount());
-            transaction = new Transaction(accountFrom, accountTo, transactionDTO.getAmount());
-            Transaction createdTransaction = transactionRepository.save(transaction);
-            LOGGER.info("Successfully created transaction with [ID: {}]", createdTransaction.getId());
-        } else {
-            LOGGER.error("[ERROR] -> Not enough balance");
-            throw new AppException("Account from doesn't have enough funds to execute the transaction");
-        }
-
-        return new TransactionGetDTO("Success", transaction.getId(), transaction.getAccountFrom().getId(), transaction.getAccountTo().getId(), transaction.getAmount());
     }
 
     public List<AccountGetDTO> getRegularCheckingAccounts(){
