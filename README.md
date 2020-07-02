@@ -35,7 +35,10 @@ is the same of the date that we have to charge, it will charge and update the cu
 
 ## Authentication:
 I decided to implement JWT(JSON Web Tokens) authentication instead of basic authentication. Explained in the diagram how it works.
+
+
 ![JWTAuthDiagram](https://i.ibb.co/RDw2TSM/Captura-de-ecra-2020-06-27-a-s-00-31-27.png)
+
 
 ## Authorizathion:
 Almost all the routes have a pre-authorize, but some depends. For example I authorize an user with the role ACCOUNT_HOLDER to see the balance of his own accounts, but I just check if the account belongs to him inside of the method in the service.
