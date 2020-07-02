@@ -2,7 +2,7 @@
 
 !! Not finished
 
-## Notes
+## Notes:
 Project is in the folder server. Folder client is the React app I'm developing for the front-end but didn't have the time to finish for now.
 After running the program, open http://localhost:8080/swagger-ui.html to try all the endpoints. 
 First of all, you have to sign in as a admin, account holder or third party. You have 2 routes to sign in, if you are an admin or account holder use the first route
@@ -42,8 +42,8 @@ I decided to implement JWT(JSON Web Tokens) authentication instead of basic auth
 ## Authorizathion:
 Almost all the routes have a pre-authorize, but some depends. For example I authorize an user with the role ACCOUNT_HOLDER to see the balance of his own accounts, but I just check if the account belongs to him inside of the method in the service.
 
-## Exceptions and Validations
+## Exceptions and Validations:
 I'm handling all exceptions for not found, not authorized, not enoughs funds, invalid inputs. For validations I'm using Bean Validation 2.0, this has a fantastic Java Validation API, we insert the fields that can't be null, that have to be postive, number of integer and decimal parts in BigDecimal values, patterns to match a phone number and email.
 
-## DTOs
+## DTOs:
 Data Transfer Objects were implemented to map from the models objects to the objects I wish to return to the user(to not return unecessary information), to update partially and to insert new data.
