@@ -1,7 +1,5 @@
 # BankingSystem
 
-!! Not finished
-
 ## Notes:
 Project is in the folder server. Folder client is the React app I'm developing for the front-end but didn't have the time to finish for now.
 After running the program, open http://localhost:8080/swagger-ui.html to try all the endpoints. 
