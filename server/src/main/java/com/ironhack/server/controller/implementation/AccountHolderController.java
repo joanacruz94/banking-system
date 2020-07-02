@@ -3,7 +3,6 @@ package com.ironhack.server.controller.implementation;
 import com.ironhack.server.controller.interfaces.AccountHolderInterface;
 import com.ironhack.server.dto.AccountHolderDTO;
 import com.ironhack.server.dto.SignUpAccountHolderRequest;
-import com.ironhack.server.model.AccountHolder;
 import com.ironhack.server.service.AccountHolderService;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,9 +18,9 @@ public class AccountHolderController implements AccountHolderInterface {
     @Autowired
     AccountHolderService accountHolderService;
 
+    @GetMapping("/{id}")
     @ApiOperation(value = "See information of an account holder user by ID")
     @PreAuthorize("hasRole('ADMIN')")
-    @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     public AccountHolderDTO getAccountHolderById(@PathVariable Long id){
         return accountHolderService.findAccountHolderById(id);
@@ -30,7 +29,7 @@ public class AccountHolderController implements AccountHolderInterface {
     @ApiOperation(value = "Check all account holders in the system")
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/accountHolders")
-    @ResponseStatus(HttpStatus.CREATED)
+    @ResponseStatus(HttpStatus.OK)
     public List<AccountHolderDTO> getAccountHolders(){
         return accountHolderService.findAllAccountHolders();
     }

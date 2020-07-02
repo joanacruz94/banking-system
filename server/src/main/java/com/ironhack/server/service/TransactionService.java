@@ -9,8 +9,8 @@ import com.ironhack.server.model.Account;
 import com.ironhack.server.model.Transaction;
 import com.ironhack.server.repository.AccountRepository;
 import com.ironhack.server.repository.TransactionRepository;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -74,7 +75,7 @@ public class TransactionService {
         List<String> ownersNames = accountFrom.getOwners().stream().map(owner -> owner.getEmail()).collect(Collectors.toList());
         if(!ownersNames.contains(auth.getName())) {
             LOGGER.error("[ERROR] -> Not authorized");
-            throw new AppException("Not authorized");
+            throw new AppException("Not authorized. Not yours account");
         }
         if(transactionDTO.getAccountIDFrom() == transactionDTO.getAccountIDTo()) {
             LOGGER.error("[ERROR] -> Trying to transfer to the same account");
@@ -85,11 +86,21 @@ public class TransactionService {
         if(transactions.size() > 0) {
             Transaction lastTransaction = transactions.get(transactions.size() - 1);
             long timeBetween = ChronoUnit.SECONDS.between(lastTransaction.getTransactionDate(), LocalDateTime.now());
+            String currentDate = LocalDate.now().toString();
+            List<BigDecimal> averageSpent = transactionRepository.findAmountsBeforeDate(accountFrom.getId(), currentDate);
+            BigDecimal spentCurrentDate = transactionRepository.findAmountPerDate(accountFrom.getId(), currentDate);
+            spentCurrentDate.add(transactionDTO.getAmount());
             if (timeBetween < 1) {
                 accountFrom.setStatus(Status.FROZEN);
                 accountRepository.save(accountFrom);
                 LOGGER.error("[ERROR] -> Fraud Detection");
                 throw new AppException("Fraud detection: Your account was frozen since transactions are made with one second between");
+            }
+            for(BigDecimal value : averageSpent) {
+                if(spentCurrentDate.add(spentCurrentDate.multiply(new BigDecimal("1.5"))).compareTo(value) > 0) {
+                    LOGGER.error("[ERROR] -> Fraud Detection");
+                    throw new AppException("Fraud detection: Your account was frozen since transactions are made with one second between");
+                }
             }
         }
 
@@ -98,7 +109,7 @@ public class TransactionService {
             accountTo.creditBalance(transactionDTO.getAmount());
             transaction = new Transaction(accountFrom, accountTo, transactionDTO.getAmount());
             Transaction createdTransaction = transactionRepository.save(transaction);
-            LOGGER.info("Successfully created transaction with [ID: {}]", createdTransaction.getId());
+            LOGGER.info("Successfully created transaction with [ID: {}]" + createdTransaction.getId());
         } else {
             LOGGER.error("[ERROR] -> Not enough balance");
             throw new AppException("Account from doesn't have enough funds to execute the transaction");

@@ -42,8 +42,13 @@ public class SwaggerConfiguration {
                 .paths(PathSelectors.any())
                 .build()
                 .apiInfo(apiInfo())
+                .securitySchemes(Collections.singletonList(apiKey()))
                 .consumes(new HashSet<String>(Arrays.asList("application/json")))
                 .produces(new HashSet<String>(Arrays.asList("application/json")));
+    }
+
+    private ApiKey apiKey() {
+        return new ApiKey("Authorization", "Bearer", "header");
     }
 
     private ApiInfo apiInfo() {

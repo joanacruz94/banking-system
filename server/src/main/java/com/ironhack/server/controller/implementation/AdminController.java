@@ -21,7 +21,7 @@ public class AdminController implements AdminInterface {
 
     @ApiOperation(value = "See information of an admin user by ID")
     @PreAuthorize("hasRole('ADMIN')")
-    @GetMapping("/admin/{id}")
+    @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     public AdminSummary getAdminById(@PathVariable Long id){
         return adminService.findAdminById(id);
@@ -29,7 +29,7 @@ public class AdminController implements AdminInterface {
 
     @ApiOperation(value = "Check all the admin users in the system")
     @GetMapping("/admins")
-    @ResponseStatus(HttpStatus.CREATED)
+    @ResponseStatus(HttpStatus.OK)
     public List<AdminSummary> getAdmins(){
         return adminService.findAllAdmins();
     }
