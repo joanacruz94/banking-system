@@ -3,7 +3,6 @@
 Spring-boot application to simulate a banking system, with different types of users and accounts, transactions and fraud detection
 
 ## Notes:
-Project is in the folder server. Folder client is the React app I'm developing for the front-end but didn't have the time to finish for now.
 After running the program, open http://localhost:8080/swagger-ui.html to try all the endpoints. 
 First of all, you have to sign in as a admin, account holder or third party. You have 2 routes to sign in, if you are an admin or account holder use the first route
 and enter your email and password, if you are a third party user, sign in with your email and secret. You can use one of examples that I inserted in the database,
