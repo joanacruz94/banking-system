@@ -1,6 +1,6 @@
-package com.server.controller.implementation;
+package com.server.implementation;
 
-import com.server.controller.interfaces.AccountInterface;
+import com.server.interfaces.AccountInterface;
 import com.server.dto.AccountGetDTO;
 import com.server.dto.CheckingAccountPostDTO;
 import com.server.dto.CreditCardAccountPostDTO;

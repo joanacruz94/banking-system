@@ -1,4 +1,4 @@
-package com.server.controller.interfaces;
+package com.server.interfaces;
 
 import com.server.dto.AccountHolderDTO;
 import com.server.dto.SignUpAccountHolderRequest;

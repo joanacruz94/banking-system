@@ -1,6 +1,6 @@
-package com.server.controller.implementation;
+package com.server.implementation;
 
-import com.server.controller.interfaces.ThirdPartyInterface;
+import com.server.interfaces.ThirdPartyInterface;
 import com.server.dto.SignUpThirdPartyRequest;
 import com.server.dto.ThirdPartySummary;
 import com.server.service.ThirdPartyService;
