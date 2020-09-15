@@ -1,4 +1,4 @@
-package com.server.implementation;
+package com.server.controller.implementation;
 
 import com.server.dto.*;
 import com.server.dto.JwtAuthenticationResponse;

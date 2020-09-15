@@ -1,4 +1,4 @@
-package com.server.interfaces;
+package com.server.controller.interfaces;
 
 import com.server.dto.SignUpThirdPartyRequest;
 import com.server.dto.ThirdPartySummary;

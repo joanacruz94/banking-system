@@ -1,6 +1,6 @@
-package com.server.implementation;
+package com.server.controller.implementation;
 
-import com.server.interfaces.AccountHolderInterface;
+import com.server.controller.interfaces.AccountHolderInterface;
 import com.server.dto.AccountHolderDTO;
 import com.server.dto.SignUpAccountHolderRequest;
 import com.server.service.AccountHolderService;

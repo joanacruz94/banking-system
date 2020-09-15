@@ -1,6 +1,6 @@
-package com.server.implementation;
+package com.server.controller.implementation;
 
-import com.server.interfaces.AdminInterface;
+import com.server.controller.interfaces.AdminInterface;
 import com.server.dto.SignUpAdminRequest;
 import com.server.dto.AdminSummary;
 import com.server.service.AdminService;

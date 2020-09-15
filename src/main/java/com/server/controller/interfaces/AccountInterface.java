@@ -1,4 +1,4 @@
-package com.server.interfaces;
+package com.server.controller.interfaces;
 
 import com.server.dto.AccountGetDTO;
 import com.server.dto.CheckingAccountPostDTO;

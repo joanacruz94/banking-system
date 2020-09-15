@@ -1,6 +1,6 @@
-package com.server.implementation;
+package com.server.controller.implementation;
 
-import com.server.interfaces.TransactionInterface;
+import com.server.controller.interfaces.TransactionInterface;
 import com.server.dto.TransactionGetDTO;
 import com.server.dto.TransactionPostDTO;
 import com.server.service.TransactionService;
